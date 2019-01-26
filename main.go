@@ -20,10 +20,6 @@ func main() {
     go discordfeed(c, done)
     go twitterfeed(c, done)
 
-    time.Sleep(2 * time.Second)
-    log.Println("testing a signal")
-    c <- "passing a message to the channel"
-
     log.Println("ctrl+x to exit")
     sc := make(chan os.Signal, 1)
     signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
@@ -81,7 +77,7 @@ func discordfeed(c chan string, done chan string) {
             case message := <-c:
                 discord.ChannelMessageSend("538683678708989952", message) // #twitter channel
             default:
-                log.Println("discord loop has no messages from twitter")
+                time.Sleep(1 * time.Second)
             }
 
             select {
@@ -93,8 +89,6 @@ func discordfeed(c chan string, done chan string) {
             default:
                 time.Sleep(1 * time.Second)
             }
-
-            time.Sleep(1 * time.Second)
         }
     }()
 }
