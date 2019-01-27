@@ -11,8 +11,8 @@ import (
     "github.com/dghubble/oauth1"
 )
 
-// Twitterfeed fetches tweets and passes them back through channel "c"
-func Twitterfeed(c chan string, done chan string) {
+// Twitterfeed fetches tweets and passes them back through channel "discord"
+func Twitterfeed(discord chan string, closeTwitter chan string) {
 
     flags := flag.NewFlagSet("user-auth", flag.ExitOnError)
     consumerKey := flags.String("consumer-key", "", "Twitter Consumer Key")
@@ -28,29 +28,25 @@ func Twitterfeed(c chan string, done chan string) {
 
     config := oauth1.NewConfig(*consumerKey, *consumerSecret)
     token := oauth1.NewToken(*accessToken, *accessSecret)
-    // OAuth1 http.Client will automatically authorize Requests
-    httpClient := config.Client(oauth1.NoContext, token)
-
-    // Twitter Client
+    httpClient := config.Client(oauth1.NoContext, token) // OAuth1 http.Client will automatically authorize Requests
     client := twitter.NewClient(httpClient)
 
     // Convenience Demux demultiplexed stream messages
     demux := twitter.NewSwitchDemux()
     demux.Tweet = func(tweet *twitter.Tweet) {
-        message := "https://twitter.com/" + tweet.User.ScreenName + "/status/" + tweet.IDStr
-        log.Println(message)
-        c <- message
+        message := "https://twitter.com/" + tweet.User.ScreenName + "/status/" + tweet.IDStr // Get link to tweet
+        discord <- message                                                                   // Pass tweet back to discord
     }
     demux.DM = func(dm *twitter.DirectMessage) {
         log.Println(dm.SenderID)
     }
 
-    log.Println("Twitterfeed starting")
+    log.Println("Opening twitter connection")
 
     // FILTER
     filterParams := &twitter.StreamFilterParams{
-        //Track:         []string{"testing"},
-        Follow:        []string{"1050383420960980998"}, // cryosphereband
+        Track:         []string{"cryosphereband"},
+        Follow:        []string{"1050383420960980998"}, // cryosphereband userid
         StallWarnings: twitter.Bool(true),
     }
     stream, err := client.Streams.Filter(filterParams)
@@ -64,14 +60,15 @@ func Twitterfeed(c chan string, done chan string) {
     go func() {
         for {
             select {
-            case donesignal := <-done:
-                log.Println(donesignal)
+            case <-closeTwitter:
                 log.Println("Closing twitter connection")
                 stream.Stop() // Close twitter connection if the "close" message has been received
-                break
+                close(closeTwitter)
+                return
             default:
                 time.Sleep(1 * time.Second)
             }
         }
+        return
     }()
 }

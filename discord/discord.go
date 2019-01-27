@@ -24,16 +24,12 @@ func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate)
     }
 }
 
-// Discordfeed connects to discord and receives twitter messages from channel "c"
-func Discordfeed(c chan string, done chan string) {
-    log.Println("cryobot starting")
-
+// Discordfeed connects to discord and receives twitter messages to post
+func Discordfeed(twitter chan string, closeDiscord chan string) {
     token := os.Getenv("CRYO_TOKEN")
-
     discord, err := discordgo.New("Bot " + token)
-
     if err != nil {
-        log.Println("error creating Discord session,", err)
+        log.Println("error creating Discord session, ", err)
         return
     }
 
@@ -41,11 +37,10 @@ func Discordfeed(c chan string, done chan string) {
     discord.AddHandler(messageCreate)
 
     // Open socket
+    log.Println("Opening discord connection")
     err = discord.Open()
     if err != nil {
-        log.Println("Could not open socket to discord")
-        log.Println(err)
-
+        log.Println("Could not open socket to discord, ", err)
         return
     }
 
@@ -53,21 +48,23 @@ func Discordfeed(c chan string, done chan string) {
     go func() {
         for {
             select {
-            case message := <-c:
-                discord.ChannelMessageSend("538683678708989952", message) // #twitter channel
+            case tweet := <-twitter:
+                discord.ChannelMessageSend("538683678708989952", tweet) // sends tweet to discord channel "#twitter"
             default:
                 time.Sleep(1 * time.Second)
             }
 
             select {
-            case donesignal := <-done:
-                log.Println(donesignal)
+            case <-closeDiscord: // If anything is received on this channel, disconnect from discord
                 log.Println("Closing discord connection")
-                discord.Close() // Close discord connection if the "close" message has been received
-                break
+                discord.Close()
+                close(twitter)
+                close(closeDiscord)
+                return
             default:
                 time.Sleep(1 * time.Second)
             }
         }
+        return
     }()
 }
