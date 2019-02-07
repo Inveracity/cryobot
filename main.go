@@ -1,7 +1,7 @@
 package main
 
 import (
-    _ "cryobot/discord"
+    "cryobot/discord"
     "cryobot/twitter"
     "cryobot/config"
     "log"
