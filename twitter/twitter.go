@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"time"
+    "strings"
 
 	"cryobot/config"
 
@@ -47,7 +48,7 @@ func Twitterfeed(discord chan string, closeTwitter chan string, cfg config.Confi
 	demux.Tweet = func(tweet *twitter.Tweet) {
 		if !isBlacklisted(tweet.User.ScreenName, cfg) {                                          // If user not blacklisted
 			message := "https://twitter.com/" + tweet.User.ScreenName + "/status/" + tweet.IDStr // Get link to tweet
-            if tweet.Retweeted {
+            if strings.HasPrefix(tweet.Text, "RT ") {
                 message = "User "+tweet.User.ScreenName+" retweeted <"+message+">"                // disable embedding for retweets in discord
             }
 			discord <- message // Pass tweet back to discord
