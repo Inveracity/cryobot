@@ -1,0 +1,33 @@
+language: go
+
+go:
+  - 1.11.x
+
+branches:
+  only:
+    - master
+
+services:
+  - docker
+
+script:
+  - go build cryoboy
+
+sudo: required
+
+before_install:
+  - docker pull inveracity/cryobot:latest
+
+install:
+  - go get github.com/mitchellh/gox
+  - go install github.com/mitchellh/gox
+
+script:
+  - go get
+  - gox -osarch="linux/amd64"
+
+after_success:
+  - docker build -t inveracity/cryobot:latest -f dockerfile .
+
+notifications:
+  email: false
