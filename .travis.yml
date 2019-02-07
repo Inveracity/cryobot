@@ -23,6 +23,7 @@ install:
   - go install github.com/mitchellh/gox
 
 script:
+  - ls -la
   - go get
   - gox -osarch="linux/amd64"
 
