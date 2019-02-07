@@ -1,4 +1,5 @@
 # Cryobot
+![](https://travis-ci.org/Inveracity/cryobot.svg?branch=master)
 
 A bot for the CRYOSPHERE Discord server
 

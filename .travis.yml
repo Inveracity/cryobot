@@ -24,6 +24,7 @@ install:
 
 script:
   - go get -v
+  - go test
   - gox -osarch="linux/amd64"
 
 after_success:
