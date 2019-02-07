@@ -1,4 +1,4 @@
-package twitter
+package main
 
 import (
 	"flag"
@@ -7,14 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"cryobot/config"
-
 	"github.com/coreos/pkg/flagutil"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 )
 
-func isBlacklisted(account string, cfg config.Config) bool {
+func isBlacklisted(account string, cfg Config) bool {
 	for _, blacklisted := range cfg.Twitter.Blacklist {
 		if blacklisted == account {
 			return true
@@ -24,7 +22,7 @@ func isBlacklisted(account string, cfg config.Config) bool {
 }
 
 // Twitterfeed fetches tweets and passes them back through channel "discord"
-func Twitterfeed(discord chan string, closeTwitter chan string, cfg config.Config) {
+func Twitterfeed(discord chan string, closeTwitter chan string, cfg Config) {
 
 	flags := flag.NewFlagSet("user-auth", flag.ExitOnError)
 	consumerKey := flags.String("consumer-key", "", "Twitter Consumer Key")

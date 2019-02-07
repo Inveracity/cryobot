@@ -1,4 +1,4 @@
-package config
+package main
 
 import (
 	"gopkg.in/yaml.v2"
@@ -8,16 +8,10 @@ import (
 )
 
 /*
-
 this site is awesome: https://transform.now.sh/json-to-go/
-
-twitter:
-  blacklist:
-    - user1
-    - user2
-    - user3
 */
 
+// Config contains the variables required by the config.yml file
 type Config struct {
 	Twitter struct {
 		Track     []string `yaml:"track"`
@@ -26,6 +20,7 @@ type Config struct {
 	} `yaml:"twitter"`
 }
 
+// ReadConfig reads the config.yml file and returns a Config struct
 func ReadConfig() Config {
 	b, err := ioutil.ReadFile("./config.yml")
 	if err != nil {
