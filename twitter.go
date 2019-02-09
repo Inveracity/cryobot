@@ -15,6 +15,7 @@ import (
 func isBlacklisted(account string, cfg Config) bool {
 	for _, blacklisted := range cfg.Twitter.Blacklist {
 		if blacklisted == account {
+			log.Println("detected blacklisted userid: " + account)
 			return true
 		}
 	}
@@ -44,7 +45,7 @@ func Twitterfeed(discord chan string, closeTwitter chan string, cfg Config) {
 	// Convenience Demux demultiplexed stream messages
 	demux := twitter.NewSwitchDemux()
 	demux.Tweet = func(tweet *twitter.Tweet) {
-		if !isBlacklisted(tweet.User.ScreenName, cfg) { // If user not blacklisted
+		if !isBlacklisted(tweet.User.IDStr, cfg) { // If user not blacklisted
 			message := "https://twitter.com/" + tweet.User.ScreenName + "/status/" + tweet.IDStr // Get link to tweet
 			if strings.HasPrefix(tweet.Text, "RT ") {
 				message = "User " + tweet.User.ScreenName + " retweeted <" + message + ">" // disable embedding for retweets in discord

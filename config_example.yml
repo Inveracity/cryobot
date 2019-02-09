@@ -3,7 +3,7 @@ twitter:
     - cryosphereband #if anyone tweets about "cryosphereband"
   follow:
     - "1050383420960980998" #cryosphereband userid
-  blacklist:
-    - user1
-    - user2
-    - user3
+  blacklist: #User ID's
+    - "123123123"
+    - "456456456"
+    - "789789789"
